@@ -21,11 +21,20 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+uint8_t LEFT_Pressed = 0;
+uint8_t Right_Pressed = 0;
+uint8_t Right_cont = 0;
+uint8_t LEFT_cont = 0;
+static int TEMP = 0;
+static int TEMP_1 = 0;
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
+
+  /* NOTE: This function should not be modified, when the callback is needed,
+           the HAL_GPIO_EXTI_Callback could be implemented in the user file
+   */
 
 /* USER CODE END PTD */
 
@@ -56,7 +65,26 @@ static void MX_USART2_UART_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  /* Prevent unused argument(s) compilation warning */
+  if(GPIO_Pin == BUTTON_LEFT_Pin){
+	  HAL_UART_Transmit(&huart2, "Button_Left\r\n", 12, 10);
+	  LEFT_Pressed = 1;
+	  if(HAL_GetTick() - TEMP <= 500){
+		  TEMP = HAL_GetTick();
+		  LEFT_cont = LEFT_cont + 1;
+	  }
+  }
+  if(GPIO_Pin == BUTTON_RIGHT_Pin){
+	  HAL_UART_Transmit(&huart2, "BUTTON_RIGHT\r\n", 12, 10);
+	  Right_Pressed = 1;
+	  if(HAL_GetTick() - TEMP_1 <= 500){
+		  TEMP_1 = HAL_GetTick();
+		  Right_cont = Right_cont + 1;
+	  	  }
+    }
+}
 /* USER CODE END 0 */
 
 /**
@@ -96,6 +124,41 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	 if (LEFT_Pressed !=0 ){
+		 HAL_GPIO_WritePin(LED_RIGHT_GPIO_Port, LED_RIGHT_Pin, 1);
+	  if (LEFT_cont >= 2){
+		  for (uint32_t i = 0; i < 10000000000000000 ; i++){
+		  		  HAL_GPIO_TogglePin(LED_LEFT_GPIO_Port, LED_LEFT_Pin);
+		  		  HAL_Delay(250);
+		  }
+	  }
+	  else{
+
+		  for (uint8_t i = 0; i < 6; i++){
+			  HAL_GPIO_TogglePin(LED_LEFT_GPIO_Port, LED_LEFT_Pin);
+			  HAL_Delay(250);
+		  }
+	  }
+	  LEFT_Pressed = 0;
+	 }
+
+  if (Right_Pressed !=0 ){
+	  HAL_GPIO_WritePin(LED_LEFT_GPIO_Port, LED_LEFT_Pin, 1);
+	  if (Right_cont >= 2){
+	  		  for (uint32_t i = 0; i < 10000000000000000 ; i++){
+	  		  		  HAL_GPIO_TogglePin(LED_RIGHT_GPIO_Port, LED_RIGHT_Pin);
+	  		  		  HAL_Delay(250);
+	  		  }
+	  	  }
+	  	  else{
+
+	  		  for (uint8_t i = 0; i < 6; i++){
+	  			  HAL_GPIO_TogglePin(LED_RIGHT_GPIO_Port, LED_RIGHT_Pin);
+	  			  HAL_Delay(250);
+	  		  }
+	  	  }
+	  	  Right_Pressed = 0;
+  	  }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
